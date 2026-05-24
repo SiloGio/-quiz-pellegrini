@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Allenamento — Contaminazione Alimenti — Classe 4T</title>
+<style>
+  :root {
+    --blu:#1F3864; --blu2:#2F5496; --verde:#1a7a3c; --rosso:#b91c1c;
+    --arancio:#d97706; --azzurro:#0369a1; --grigio:#f4f4f2;
+    --bordo:#d1d5db; --testo:#1a1a18;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#eceae5;color:var(--testo);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+  .card{background:#fff;border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.13);max-width:760px;width:100%;padding:2.2rem 2.4rem}
+
+  /* INTRO */
+  .intro-logo{font-size:13px;color:#888;margin-bottom:.6rem;font-weight:600;letter-spacing:.04em}
+  .intro-titolo{font-size:1.55rem;font-weight:700;color:var(--blu);margin-bottom:.3rem}
+  .intro-sotto{font-size:1rem;color:#555;margin-bottom:1.4rem}
+  .intro-box{background:var(--grigio);border-radius:10px;padding:1.2rem 1.4rem;margin-bottom:1.2rem;font-size:.93rem;line-height:1.65}
+  .intro-box h3{font-size:.95rem;font-weight:700;margin-bottom:.5rem;color:var(--blu2)}
+  .intro-box ul{padding-left:1.3rem}
+  .intro-box li{margin-bottom:.25rem}
+  .badge-hint{display:inline-block;background:#e0f0fb;color:var(--azzurro);border-radius:6px;padding:2px 10px;font-size:.82rem;font-weight:600;margin-left:6px}
+  .btn-start{width:100%;background:var(--blu);color:#fff;border:none;border-radius:10px;padding:.85rem 1.5rem;font-size:1.05rem;font-weight:700;cursor:pointer;margin-top:.5rem;transition:background .15s}
+  .btn-start:hover{background:var(--blu2)}
+
+  /* QUIZ */
+  .quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.4rem;flex-wrap:wrap;gap:.5rem}
+  .progress-label{font-size:.85rem;color:#666;font-weight:600}
+  .progress-bar-outer{height:8px;background:#e5e7eb;border-radius:99px;flex:1;margin:0 .9rem;min-width:80px}
+  .progress-bar-inner{height:100%;border-radius:99px;background:var(--blu2);transition:width .3s}
+  .timer-box{display:flex;align-items:center;gap:6px;font-weight:700;font-size:1rem;min-width:60px;justify-content:flex-end}
+  .timer-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:800;border:3px solid var(--blu2);color:var(--blu2);transition:all .3s}
+  .timer-circle.warn{border-color:var(--arancio);color:var(--arancio)}
+  .timer-circle.danger{border-color:var(--rosso);color:var(--rosso)}
+
+  .q-tipo{font-size:.78rem;font-weight:700;color:#fff;background:var(--blu2);border-radius:99px;padding:2px 12px;margin-bottom:.7rem;display:inline-block;letter-spacing:.04em}
+  .q-num{font-size:.82rem;color:#888;margin-bottom:.4rem}
+  .q-testo{font-size:1.05rem;font-weight:600;line-height:1.55;margin-bottom:1.2rem;color:var(--testo)}
+
+  /* V/F */
+  .vf-row{display:flex;gap:1rem;margin-bottom:1rem}
+  .vf-btn{flex:1;padding:.7rem;border-radius:9px;border:2px solid var(--bordo);background:var(--grigio);font-size:1rem;font-weight:700;cursor:pointer;transition:all .15s}
+  .vf-btn:hover:not(:disabled){background:#dbeafe;border-color:var(--azzurro)}
+  .vf-btn.sel-v{background:#dcfce7;border-color:var(--verde);color:var(--verde)}
+  .vf-btn.sel-f{background:#fee2e2;border-color:var(--rosso);color:var(--rosso)}
+
+  /* MC */
+  .mc-opzioni{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
+  .mc-btn{padding:.7rem 1rem;border-radius:9px;border:2px solid var(--bordo);background:var(--grigio);font-size:.95rem;cursor:pointer;text-align:left;transition:all .15s}
+  .mc-btn:hover:not(:disabled){background:#dbeafe;border-color:var(--azzurro)}
+  .mc-btn.mc-corr{background:#dcfce7;border-color:var(--verde);color:var(--verde);font-weight:700}
+  .mc-btn.mc-err{background:#fee2e2;border-color:var(--rosso);color:var(--rosso)}
+  .mc-btn.mc-show{background:#dcfce7;border-color:var(--verde);color:var(--verde);font-weight:700}
+
+  /* APERTA */
+  .aperta-area{width:100%;border:2px solid var(--bordo);border-radius:9px;padding:.8rem;font-size:.95rem;font-family:inherit;resize:vertical;min-height:100px;background:var(--grigio)}
+  .aperta-area:focus{outline:none;border-color:var(--azzurro)}
+
+  /* FEEDBACK */
+  .feedback{border-radius:10px;padding:1rem 1.2rem;margin-top:.9rem;font-size:.92rem;line-height:1.6;display:none}
+  .feedback.corretto{background:#dcfce7;border-left:4px solid var(--verde)}
+  .feedback.errato{background:#fee2e2;border-left:4px solid var(--rosso)}
+  .feedback.aperta-fb{background:#eff6ff;border-left:4px solid var(--azzurro)}
+  .feedback .fb-titolo{font-weight:700;margin-bottom:.35rem}
+  .feedback .hint-box{background:#e0f0fb;border-radius:7px;padding:.55rem .9rem;margin-top:.7rem;font-size:.88rem;color:#1e4a6e}
+  .feedback .hint-box strong{color:var(--azzurro)}
+
+  .btn-avanti{width:100%;background:var(--blu);color:#fff;border:none;border-radius:10px;padding:.8rem;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1.1rem;display:none;transition:background .15s}
+  .btn-avanti:hover{background:var(--blu2)}
+  .btn-avanti-aperta{width:100%;background:var(--azzurro);color:#fff;border:none;border-radius:10px;padding:.8rem;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.8rem;transition:background .15s}
+  .btn-avanti-aperta:hover{background:#0284c7}
+
+  /* SCADUTO */
+  .scaduto-box{background:#fff7ed;border:2px solid var(--arancio);border-radius:10px;padding:.9rem 1.2rem;margin-top:.9rem;text-align:center;font-size:.93rem;display:none}
+
+  /* FINALE */
+  .finale-titolo{font-size:1.6rem;font-weight:800;color:var(--blu);margin-bottom:.3rem;text-align:center}
+  .score-cerchio{width:120px;height:120px;border-radius:50%;border:6px solid var(--blu2);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:1.2rem auto}
+  .score-num{font-size:2rem;font-weight:800;color:var(--blu)}
+  .score-sub{font-size:.78rem;color:#888}
+  .barra-outer{height:20px;background:#e5e7eb;border-radius:99px;margin:1rem 0}
+  .barra-inner{height:100%;border-radius:99px;transition:width 1s}
+  .msg-livello{text-align:center;font-size:1rem;padding:.9rem 1.2rem;border-radius:10px;margin-bottom:1.2rem;font-weight:600}
+  .tabella-ris{width:100%;border-collapse:collapse;font-size:.88rem;margin-bottom:1.2rem}
+  .tabella-ris th{background:var(--grigio);padding:.5rem .8rem;text-align:left;border-bottom:2px solid var(--bordo);font-size:.8rem;color:#555;text-transform:uppercase;letter-spacing:.04em}
+  .tabella-ris td{padding:.5rem .8rem;border-bottom:1px solid #e5e7eb}
+  .ok{color:var(--verde);font-weight:700}
+  .ko{color:var(--rosso);font-weight:700}
+  .btn-riprova{width:100%;background:var(--verde);color:#fff;border:none;border-radius:10px;padding:.8rem;font-size:1rem;font-weight:700;cursor:pointer;transition:background .15s}
+  .btn-riprova:hover{background:#15803d}
+
+  @media(max-width:520px){.card{padding:1.3rem 1.1rem}.vf-row{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="card" id="schermata-intro">
+  <div class="intro-logo">ITA "N. Pellegrini" · Sassari · Prof. Sechi S.G.M. · Classe 4ª T</div>
+  <div class="intro-titolo">🎯 Quiz di allenamento</div>
+  <div class="intro-sotto">Contaminazione Alimenti · HACCP · Tracciabilità · OSG · ZooTrack</div>
+
+  <div class="intro-box">
+    <h3>📋 Come funziona questo quiz</h3>
+    <ul>
+      <li>Ci sono <strong>13 domande</strong> in totale, numerate in modo continuo (1, 2, 3…)</li>
+      <li><strong>Domande 1–6 (Vero/Falso):</strong> hai <strong>25 secondi</strong> per rispondere</li>
+      <li><strong>Domande 7–11 (Scelta multipla):</strong> hai <strong>40 secondi</strong> per rispondere</li>
+      <li><strong>Domande 12–13 (Risposta aperta):</strong> hai <strong>3 minuti</strong> per rispondere</li>
+    </ul>
+  </div>
+
+  <div class="intro-box">
+    <h3>⏱ Il timer</h3>
+    <ul>
+      <li>Il cerchio in alto a destra mostra i secondi rimanenti</li>
+      <li>Diventa <span style="color:#d97706;font-weight:700">arancione</span> quando rimane poco tempo</li>
+      <li>Diventa <span style="color:#b91c1c;font-weight:700">rosso</span> negli ultimi 5 secondi</li>
+      <li>Allo scadere del tempo la domanda viene saltata automaticamente</li>
+    </ul>
+  </div>
+
+  <div class="intro-box">
+    <h3>✅ Feedback e suggerimento didattico</h3>
+    <ul>
+      <li>Dopo ogni risposta ricevi un <strong>feedback immediato</strong> (corretto / errato)</li>
+      <li>Compare sempre una casella <span class="badge-hint">💡 Concetto chiave</span> con il punto da studiare</li>
+      <li><strong>Attenzione:</strong> nella verifica reale questa casella <u>non sarà presente</u></li>
+      <li>Puoi rifare il quiz tutte le volte che vuoi — le domande sono diverse da quelle della verifica!</li>
+    </ul>
+  </div>
+
+  <button class="btn-start" onclick="avviaQuiz()">▶ Inizia l'allenamento</button>
+</div>
+
+<div class="card" id="schermata-quiz" style="display:none">
+  <div class="quiz-header">
+    <span class="progress-label" id="prog-label">Domanda 1 / 13</span>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="prog-bar" style="width:0%"></div></div>
+    <div class="timer-box"><div class="timer-circle" id="timer-circle">25</div></div>
+  </div>
+  <div id="q-contenuto"></div>
+</div>
+
+<div class="card" id="schermata-finale" style="display:none">
+  <div class="finale-titolo">🏁 Allenamento completato!</div>
+  <div class="score-cerchio">
+    <div class="score-num" id="score-num">—</div>
+    <div class="score-sub" id="score-sub">— / 13</div>
+  </div>
+  <div class="barra-outer"><div class="barra-inner" id="barra-score" style="width:0%"></div></div>
+  <div class="msg-livello" id="msg-livello"></div>
+  <table class="tabella-ris" id="tabella-risultati">
+    <thead><tr><th>N.</th><th>Domanda</th><th>Ris.</th></tr></thead>
+    <tbody id="tbody-ris"></tbody>
+  </table>
+  <button class="btn-riprova" onclick="location.reload()">🔄 Rifai il quiz</button>
+</div>
+
+<script>
+// ═══════════════════════════════════
+//  DOMANDE
+// ═══════════════════════════════════
+const DOMANDE = [
+  // ── V/F ──
+  {tipo:'vf', testo:'Il Carciofo Spinoso DOP può essere contaminato da metalli pesanti provenienti dalla sabbia sahariana, che rappresenta quindi una contaminazione esclusivamente chimica.',
+   corretta:'F',
+   spiegazioneE:'La sabbia sahariana è un esempio di contaminazione MISTA: porta particelle abrasive (fisica) e contemporaneamente metalli pesanti e spore di Aspergillus flavus (chimica).',
+   hint:'Ricorda che la sabbia sahariana non è "solo" sabbia: porta con sé anche contaminanti chimici e biologici.'},
+
+  {tipo:'vf', testo:'La contaminazione primaria avviene sempre durante la fase di lavorazione negli stabilimenti produttivi.',
+   corretta:'F',
+   spiegazioneE:'La contaminazione primaria avviene "alla fonte": animali malati, acqua e terreni inquinati, mangimi contaminati. La contaminazione durante la lavorazione è quella secondaria.',
+   hint:'Pensa al significato di "primaria": dove si trova la prima fonte di un alimento, prima che entri in stabilimento?'},
+
+  {tipo:'vf', testo:'Nel sistema ZooTrack, il bolo ruminale RFID viene impiantato chirurgicamente sotto la cute dell\'animale.',
+   corretta:'F',
+   spiegazioneE:'Il bolo ruminale NON viene impiantato: viene ingerito dall\'animale e rimane permanentemente nello stomaco reticolo per tutta la vita dell\'animale.',
+   hint:'Il termine "ruminale" ti dice dove si trova il dispositivo: che cosa ingeriscono i ruminanti?'},
+
+  {tipo:'vf', testo:'Staphylococcus aureus provoca sintomi molto rapidamente (1–6 ore) perché produce tossine termoresistenti già nell\'alimento, prima dell\'ingestione.',
+   corretta:'V',
+   hint:''},
+
+  {tipo:'vf', testo:'Il confine tra tracciabilità e rintracciabilità è il verso del percorso: la tracciabilità segue il prodotto dal campo al consumatore, la rintracciabilità fa il percorso inverso.',
+   corretta:'V',
+   hint:''},
+
+  {tipo:'vf', testo:'Il marchio OSG può essere ottenuto da qualsiasi prodotto alimentare venduto in Sardegna, anche se le materie prime provengono da altre regioni italiane.',
+   corretta:'F',
+   spiegazioneE:'Uno dei requisiti fondamentali di OSG è l\'origine geografica verificata: 100% materie prime sarde, con geolocalizzazione GPS delle particelle catastali.',
+   hint:'OSG sta per "Origine Sardegna Garantita": cosa implica la parola "Origine Sardegna" riguardo alla provenienza delle materie prime?'},
+
+  // ── MC ──
+  {tipo:'mc', testo:'Quale dei seguenti termini descrive la capacità di Listeria monocytogenes di moltiplicarsi anche a temperature di refrigerazione (4 °C)?',
+   opzioni:['Mesofila','Psicrotrofa','Termofila'],
+   corretta:1,
+   spiegazioneC:'Listeria è psicrotrofa: i batteri psicrotrofi (da "psicro" = freddo) crescono a basse temperature, rendendo la sola refrigerazione insufficiente a bloccarli.',
+   hint:'Il prefisso greco "psicro-" significa freddo: quale aggettivo descrive un organismo che cresce al freddo?'},
+
+  {tipo:'mc', testo:'Nell\'HACCP applicato alla produzione del Pecorino Romano DOP, quale limite critico viene monitorato nella fase di pastorizzazione?',
+   opzioni:['pH < 4,5 per almeno 30 secondi','72 °C per almeno 15 secondi','12–15 °C per tutta la stagionatura'],
+   corretta:1,
+   spiegazioneC:'La pastorizzazione HTST (High Temperature Short Time) prevede 72 °C × 15 secondi: è il binomio tempo/temperatura sufficiente a eliminare i patogeni non sporigeni nel latte.',
+   hint:'La pastorizzazione HTST combina una temperatura elevata con un breve tempo di esposizione: quale combinazione è quella standard per il latte?'},
+
+  {tipo:'mc', testo:'Quale sistema di garanzia ha il compito specifico di monitorare la salute degli animali da allevamento e garantire la loro identificazione individuale tramite RFID?',
+   opzioni:['OSG (Origine Sardegna Garantita)','GAP (Good Agricultural Practices)','ZooTrack'],
+   corretta:2,
+   spiegazioneC:'ZooTrack è il sistema digitale integrato per l\'anagrafe animale, il fascicolo sanitario individuale e l\'allerta precoce (EWS), gestito da RAS–ASL–IZS.',
+   hint:''},
+
+  {tipo:'mc', testo:'Un produttore di olio EVO sardo DOP deve effettuare l\'analisi ICP-MS per controllare quali contaminanti chimici?',
+   opzioni:['Residui di pesticidi','Metalli pesanti come arsenico e cromo','Micotossine come aflatossine'],
+   corretta:1,
+   spiegazioneC:'I suoli sardi di origine vulcanica presentano naturalmente concentrazioni di As (arsenico) e Cr (cromo) che possono trasferirsi nell\'olio. L\'ICP-MS è l\'analisi strumentale che li quantifica con alta precisione.',
+   hint:'ICP-MS è una tecnica analitica per rilevare elementi inorganici in tracce: quali contaminanti inorganici sono tipici dei suoli vulcanici?'},
+
+  {tipo:'mc', testo:'Quale organismo di certificazione, accreditato da ACCREDIA, verifica il rispetto del disciplinare IGP per l\'Agnello di Sardegna prima della macellazione?',
+   opzioni:['ASL territoriale','CSQA','IZS Sardegna'],
+   corretta:1,
+   spiegazioneC:'CSQA è uno dei principali organismi di certificazione privati accreditati da ACCREDIA in Italia. Prima della macellazione verifica: età max 90 gg, peso 5–7 kg, assenza trattamenti negli ultimi 30 gg e allevamento registrato in OSG.',
+   hint:'Non è un organo pubblico, ma un organismo privato accreditato: tra le tre opzioni, quale è quella privata?'},
+
+  // ── APERTE ──
+  {tipo:'aperta', testo:'Descrivi che cosa si intende per "contaminazione crociata indiretta" in un caseificio. Fai un esempio pratico e spiega come si previene.',
+   modello:'La contaminazione crociata indiretta avviene quando un contaminante si trasferisce da un alimento a un altro NON per contatto diretto, ma attraverso un veicolo intermedio: utensili, superfici, mani, indumenti. Esempio: un operatore che taglia formaggi stagionati usa il coltello, poi — senza sanificarlo — lo usa per il formaggio fresco. I batteri presenti sulla crosta degli stagionati vengono trasferiti sul prodotto fresco. Prevenzione: SSOP (Standard Sanitation Operating Procedures), cambio utensili o sanificazione tra le lavorazioni, uso di DPI dedicati per prodotti diversi, formazione del personale sull\'igiene.',
+   hint:'Pensa a cosa avviene "attraverso" qualcosa (utensile, mano, superficie) e non direttamente tra alimenti. Come si può interrompere questa catena di trasmissione?'},
+
+  {tipo:'aperta', testo:'Spiega brevemente: (a) cos\'è l\'EWS (Early Warning System) di ZooTrack, (b) quali anomalie attivano l\'allerta e (c) perché è importante per la sicurezza alimentare.',
+   modello:'(a) EWS è il sistema di allerta precoce integrato in ZooTrack: monitora automaticamente i dati del fascicolo sanitario degli animali e, al rilevamento di anomalie, invia una notifica push al veterinario ASL aprendo automaticamente una scheda epidemiologica. (b) L\'allerta si attiva se: mortalità anomala, aborti > 3% in 30 giorni, anomalie sierologiche. (c) Importanza per la sicurezza alimentare: intercettare precocemente una malattia in allevamento (es. Brucellosi, TBC bovina, PSA) permette di bloccare i movimenti degli animali e impedire che capi potenzialmente infetti entrino nella catena alimentare, evitando rischi per i consumatori e contaminazioni a valle.',
+   hint:'EWS = Early Warning System = sistema di allerta PRECOCE. Quali dati sanitari vengono monitorati? Cosa succede quando si supera una soglia critica? Perché bloccare un problema in allevamento protegge anche chi mangia il prodotto finito?'},
+];
+
+// ═══════════════════════════════════
+//  STATO QUIZ
+// ═══════════════════════════════════
+let idx = 0;
+let punteggio = 0;
+let risultati = [];
+let timerID = null;
+let secondiRim = 0;
+let rispostaData = false;
+
+function avviaQuiz() {
+  document.getElementById('schermata-intro').style.display='none';
+  document.getElementById('schermata-quiz').style.display='block';
+  mostraDomanda();
+}
+
+function mostraDomanda() {
+  rispostaData = false;
+  const d = DOMANDE[idx];
+  aggiornaProgress();
+
+  const tempi = {vf:25, mc:40, aperta:180};
+  secondiRim = tempi[d.tipo];
+  aggiornaTimer();
+
+  const cont = document.getElementById('q-contenuto');
+  const tipoLabel = {vf:'Vero o Falso', mc:'Scelta multipla', aperta:'Risposta aperta'};
+  const tempoLabel = {vf:'25 sec', mc:'40 sec', aperta:'3 min'};
+
+  let html = `<div class="q-tipo">${tipoLabel[d.tipo]} · ${tempoLabel[d.tipo]}</div>
+              <div class="q-num">Domanda ${idx+1} di ${DOMANDE.length}</div>
+              <div class="q-testo">${d.testo}</div>`;
+
+  if(d.tipo==='vf') {
+    html += `<div class="vf-row">
+      <button class="vf-btn" id="btn-V" onclick="rispondiVF('V')">✓ &nbsp;VERO</button>
+      <button class="vf-btn" id="btn-F" onclick="rispondiVF('F')">✗ &nbsp;FALSO</button>
+    </div>`;
+  } else if(d.tipo==='mc') {
+    html += `<div class="mc-opzioni">`;
+    d.opzioni.forEach((op,i)=> {
+      html += `<button class="mc-btn" id="mc-${i}" onclick="rispondiMC(${i})">${String.fromCharCode(65+i)}) ${op}</button>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<textarea class="aperta-area" id="ris-aperta" placeholder="Scrivi qui la tua risposta..."></textarea>
+             <button class="btn-avanti-aperta" onclick="consegnaAperta()">Consegna risposta</button>`;
+  }
+
+  html += `<div class="feedback" id="feedback-box"></div>
+           <div class="scaduto-box" id="scaduto-box">⏰ Tempo scaduto! Vai alla prossima domanda.</div>
+           <button class="btn-avanti" id="btn-avanti" onclick="prossima()">Avanti →</button>`;
+
+  cont.innerHTML = html;
+  avviaTimer(d.tipo, tempi[d.tipo]);
+}
+
+function avviaTimer(tipo, sec) {
+  clearInterval(timerID);
+  secondiRim = sec;
+  aggiornaTimer();
+  timerID = setInterval(()=>{
+    secondiRim--;
+    aggiornaTimer();
+    if(secondiRim<=0){
+      clearInterval(timerID);
+      if(!rispostaData) tempoScaduto(tipo);
+    }
+  },1000);
+}
+
+function aggiornaTimer() {
+  const el = document.getElementById('timer-circle');
+  if(!el) return;
+  el.textContent = secondiRim > 60 ? Math.floor(secondiRim/60)+'m'+String(secondiRim%60).padStart(2,'0') : secondiRim;
+  el.className = 'timer-circle';
+  if(secondiRim<=10 && secondiRim>5) el.classList.add('warn');
+  if(secondiRim<=5)  el.classList.add('danger');
+}
+
+function aggiornaProgress() {
+  document.getElementById('prog-label').textContent=`Domanda ${idx+1} / ${DOMANDE.length}`;
+  document.getElementById('prog-bar').style.width = (idx/DOMANDE.length*100)+'%';
+}
+
+function tempoScaduto(tipo) {
+  rispostaData = true;
+  risultati.push({idx, corretta:false, saltata:true});
+  if(tipo==='vf'){
+    document.getElementById('btn-V').disabled=true;
+    document.getElementById('btn-F').disabled=true;
+  } else if(tipo==='mc'){
+    DOMANDE[idx].opzioni.forEach((_,i)=>{ const b=document.getElementById('mc-'+i); if(b) b.disabled=true; });
+    const corrI=DOMANDE[idx].corretta;
+    const bc=document.getElementById('mc-'+corrI); if(bc) bc.classList.add('mc-show');
+  }
+  document.getElementById('scaduto-box').style.display='block';
+  document.getElementById('btn-avanti').style.display='block';
+}
+
+function rispondiVF(ris) {
+  if(rispostaData) return;
+  clearInterval(timerID);
+  rispostaData = true;
+  const d = DOMANDE[idx];
+  const ok = ris===d.corretta;
+  if(ok) punteggio++;
+  risultati.push({idx, corretta:ok, saltata:false});
+
+  document.getElementById('btn-V').disabled=true;
+  document.getElementById('btn-F').disabled=true;
+  if(ris==='V') document.getElementById('btn-V').classList.add(ok?'sel-v':'sel-f');
+  else          document.getElementById('btn-F').classList.add(ok?'sel-v':'sel-f');
+
+  mostraFeedback(ok, d);
+}
+
+function rispondiMC(i) {
+  if(rispostaData) return;
+  clearInterval(timerID);
+  rispostaData = true;
+  const d = DOMANDE[idx];
+  const ok = i===d.corretta;
+  if(ok) punteggio++;
+  risultati.push({idx, corretta:ok, saltata:false});
+
+  d.opzioni.forEach((_,j)=>{
+    const b=document.getElementById('mc-'+j); if(b) b.disabled=true;
+  });
+  document.getElementById('mc-'+i).classList.add(ok?'mc-corr':'mc-err');
+  if(!ok) document.getElementById('mc-'+d.corretta).classList.add('mc-show');
+
+  mostraFeedback(ok, d);
+}
+
+function consegnaAperta() {
+  if(rispostaData) return;
+  clearInterval(timerID);
+  rispostaData = true;
+  const ta=document.getElementById('ris-aperta');
+  ta.disabled=true;
+  risultati.push({idx, corretta:null, saltata:false});
+
+  const d=DOMANDE[idx];
+  const fb=document.getElementById('feedback-box');
+  fb.className='feedback aperta-fb';
+  fb.innerHTML=`<div class="fb-titolo">📝 Risposta inviata!</div>
+    <p style="margin-bottom:.5rem">Confronta la tua risposta con la risposta modello qui sotto:</p>
+    <p style="background:#fff;border-radius:7px;padding:.7rem .9rem;font-size:.9rem;line-height:1.6">${d.modello}</p>
+    <div class="hint-box"><strong>💡 Concetto chiave</strong> (nella verifica reale questa casella non sarà presente) — ${d.hint}</div>`;
+  fb.style.display='block';
+  document.getElementById('btn-avanti').style.display='block';
+  const ba=document.querySelector('.btn-avanti-aperta'); if(ba) ba.style.display='none';
+}
+
+function mostraFeedback(ok, d) {
+  const fb=document.getElementById('feedback-box');
+  if(ok){
+    fb.className='feedback corretto';
+    const extra = d.hint ? `<div class="hint-box"><strong>💡 Concetto chiave</strong> (nella verifica reale non presente) — ${d.hint || 'Ottimo! Hai dimostrato di conoscere bene questo concetto.'}</div>` : `<div class="hint-box"><strong>💡 Bravo!</strong> Hai risposto correttamente.</div>`;
+    fb.innerHTML=`<div class="fb-titolo">✅ Corretto!</div>${extra}`;
+  } else {
+    fb.className='feedback errato';
+    let spieg = d.tipo==='vf' ? d.spiegazioneE : d.spiegazioneC;
+    if(!spieg) spieg = `La risposta corretta era: <strong>${d.tipo==='vf'?d.corretta:String.fromCharCode(65+d.corretta)+') '+d.opzioni[d.corretta]}</strong>`;
+    const hintTxt = d.hint ? `<div class="hint-box"><strong>💡 Concetto chiave da ripassare</strong> — ${d.hint}</div>` : '';
+    fb.innerHTML=`<div class="fb-titolo">✗ Non corretto</div><p>${spieg}</p>${hintTxt}`;
+  }
+  fb.style.display='block';
+  document.getElementById('btn-avanti').style.display='block';
+}
+
+function prossima() {
+  idx++;
+  if(idx>=DOMANDE.length) mostraFinale();
+  else mostraDomanda();
+}
+
+function mostraFinale() {
+  document.getElementById('schermata-quiz').style.display='none';
+  const fin=document.getElementById('schermata-finale');
+  fin.style.display='block';
+
+  const tot=DOMANDE.length;
+  const chiuse=risultati.filter(r=>r.corretta!==null&&!r.saltata).length;
+  const giuste=risultati.filter(r=>r.corretta===true).length;
+  const perc=Math.round(giuste/chiuse*100)||0;
+
+  document.getElementById('score-num').textContent=giuste+'/'+chiuse;
+  document.getElementById('score-sub').textContent='domande chiuse risposto correttamente';
+  setTimeout(()=>{ document.getElementById('barra-score').style.width=perc+'%'; },200);
+
+  const colori=['#b91c1c','#d97706','#ca8a04','#16a34a','#15803d'];
+  const i=perc<40?0:perc<60?1:perc<75?2:perc<90?3:4;
+  document.getElementById('barra-score').style.background=colori[i];
+  document.getElementById('barra-inner');
+
+  const msg=document.getElementById('msg-livello');
+  if(perc>=90){msg.style.background='#dcfce7';msg.style.color='#15803d';msg.textContent='🏆 Eccellente! Sei pronto per la verifica.';}
+  else if(perc>=75){msg.style.background='#d1fae5';msg.style.color='#047857';msg.textContent='👍 Buon risultato! Rileggi i punti che hai sbagliato.';}
+  else if(perc>=55){msg.style.background='#fef9c3';msg.style.color='#854d0e';msg.textContent='📚 Risultato sufficiente. Ripassa i concetti nelle caselle rosse.';}
+  else if(perc>=40){msg.style.background='#ffedd5';msg.style.color='#9a3412';msg.textContent='⚠️ Alcune lacune da colmare. Studia bene il formulario prima della verifica.';}
+  else{msg.style.background='#fee2e2';msg.style.color='#991b1b';msg.textContent='📖 Non mollare! Rileggi tutto il formulario e rifai il quiz.';}
+
+  const tb=document.getElementById('tbody-ris');
+  DOMANDE.forEach((d,i)=>{
+    const r=risultati[i];
+    const stato=r.saltata?'<span style="color:#d97706">⏰ Saltata</span>':r.corretta===null?'<span style="color:#0369a1">📝 Aperta</span>':r.corretta?'<span class="ok">✓</span>':'<span class="ko">✗</span>';
+    const testo=d.testo.length>65?d.testo.substring(0,65)+'…':d.testo;
+    tb.innerHTML+=`<tr><td>${i+1}</td><td>${testo}</td><td>${stato}</td></tr>`;
+  });
+}
+</script>
+</body>
+</html>
